@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssg.potato.dao.mybatis.mapper.MessageMapper">
+	<cache />
+
+	<insert id="messagesend">
+		insert into message(message_id, caller_id, receiver_id, content, senttime)
+		values(message_seq.nextval, #{caller_id}, #{receiver_id}, #{content}, sysdate)
+	</insert>
+
+
+	<select id="messageList" resultType="Message">
+		select * from message
+		where caller_id = #{caller_id} and receiver_id = #{receiver_id}
+		or receiver_id = #{caller_id} and caller_id = #{receiver_id}
+		order by senttime
+	</select>
+ 
+	<select id="messagebox" resultType="Message">
+		SELECT * FROM message
+		WHERE message_id
+		IN (SELECT MAX(message_id)
+		FROM message
+		WHERE receiver_id = #{caller_id} or caller_id= #{caller_id}
+		GROUP BY caller_id, receiver_id)
+	</select>
+
+</mapper>

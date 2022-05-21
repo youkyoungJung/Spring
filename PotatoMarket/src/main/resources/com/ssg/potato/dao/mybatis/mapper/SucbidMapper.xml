@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="com.ssg.potato.dao.mybatis.mapper.SucbidMapper">
+
+	<!-- 낙찰자 insert -> 최초 낙찰자 선정(최종 낙찰 아니고 중간 단계임!) -->
+	<insert id="insertNoConfirmSucbid">
+		INSERT INTO SUCBID
+		(sucbid_id, sucbid_date, buyer_id,
+		sucbid_price, auction_id, bid_id, confirm) VALUES
+		(sucbid_seq.nextval, SYSDATE, #{buyer_id},
+		#{sucbid_price}, #{auction_id}, #{bid_id}, 0)
+	</insert>
+
+	<!-- 낙찰 포기 시, delete -->
+	<update id="deleteSucbid">
+		DELETE FROM SUCBID
+		WHERE auction_id = #{auction_id}
+		AND buyer_id = #{buyer_id}
+	</update>
+	
+	<!-- 낙찰 포기 시, bid 테이블에서도 삭제 delete -->
+	<update id="deleteBid">
+		DELETE FROM BID
+		WHERE auction_id = #{auction_id}
+		AND buyer_id = #{buyer_id} AND bid_id = #{bid_id}
+	</update>
+
+	<!-- 최종 낙찰 확정 후, confirm 1로 변경(이때, 최종 낙찰이 됨!) -->
+	<update id="updateConfirm">
+		UPDATE SUCBID
+		SET
+		confirm = 1
+		WHERE auction_id = #{auction_id}
+	</update>
+
+	<!-- 낙찰자 update(insert) -> 후 순위자 낙찰 선정 -->
+	<insert id="updateNoConfirmSucbid">
+		INSERT INTO SUCBID
+		(sucbid_id, sucbid_date, buyer_id,
+		sucbid_price, auction_id, bid_id, confirm) VALUES
+		(sucbid_seq.nextval, SYSDATE, #{buyer_id},
+		#{sucbid_price}, #{auction_id}, #{bid_id}, 0)
+	</insert>
+	
+	<!-- 경매 결제하기 -->
+	<insert id="insertAuctionPurchase" parameterType="com.ssg.potato.domain.purchasedHistory">
+		INSERT INTO purchasehistory (purchase_id, seller_id, transaction, transaction_id, purchaseddate, member_id, payment)
+		VALUES (purchase_seq.nextval, #{seller_id}, 3, #{transaction_id}, SYSDATE, #{member_id}, #{payment})
+	</insert>
+	
+	<!-- 해당 상품이 insert가 되었는지 확인 -->
+	<select id="getCountAuctionId" resultType="_integer">
+		SELECT count(*)
+		FROM SUCBID
+		WHERE auction_id = #{auction_id}
+	</select>
+	
+	<!-- 해당 상품이 최종 낙찰된 상품인지 확인 -->
+	<select id="getCountOKConfirmAuctionId" resultType="_integer">
+		SELECT count(*)
+		FROM SUCBID
+		WHERE auction_id = #{auction_id}
+		AND confirm = 1
+	</select>
+
+	<!-- 최종 낙찰 확정 정보 조회 -->
+	<select id="selectSucbid" resultType="com.ssg.potato.domain.AuctionThumb">
+		SELECT a.auction_id, a.title, s.sucbid_price
+		FROM sucbid s join auction a on a.auction_id = s.auction_id
+		WHERE s.auction_id = #{auction_id}
+		AND s.confirm = 1
+	</select>
+	
+	<!--경매 카트 검색 -->
+  	<select id="getNoConfirmSucbidListById" resultType="com.ssg.potato.domain.AuctionThumb">
+		SELECT a.auction_id, a.title, s.sucbid_price, a.fileName
+        from auction a join sucbid s on a.auction_id = s.auction_id
+        where s.buyer_id = #{buyer_id} AND s.confirm = 0
+        order by s.auction_id DESC
+	</select>
+	
+</mapper>

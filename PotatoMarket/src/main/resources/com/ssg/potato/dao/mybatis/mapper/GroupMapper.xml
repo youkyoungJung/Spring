@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="com.ssg.potato.dao.mybatis.mapper.GroupMapper">
+		<!--공구 추가 -->
+		<insert id="insert" parameterType="map">
+  			insert into GROUPITEM values(GROUP_SEQ.nextval, #{group.price}, sysdate, 
+  			#{group.endDate}, #{group.maxPeople}, 1, 0, #{member_id}, #{group.title}, #{group.price} / #{group.maxPeople}, 'OPEN', #{group.content}, #{group.fileName})
+  		</insert>
+  		
+  		<!--공구 수정 -->
+  		<update id="update" parameterType="map">
+			update GROUPITEM
+			set
+			TITLE = #{group.title},
+			CONTENT = #{group.content},
+			PRICE = #{group.price},
+			ENDDATE = #{group.endDate},
+			MAXPEOPLE = #{group.maxPeople},
+			DISCOUNTPRICE = #{group.price} / #{group.maxPeople},
+			FILENAME = #{group.fileName}
+			where GROUP_ID = #{group.group_id}
+		</update>	
+		
+		<!--공구 삭제 -->
+  		<update id="delete">
+			delete from GROUPITEM
+			where group_id = #{group_id}
+		</update>	
+		
+  		<!--선택된 공구 정보 -->
+  		<select id="selectGroup" resultType="com.ssg.potato.domain.Group">
+			select *
+			from GROUPITEM
+			where group_id=#{group_id}
+		</select>	
+		
+		<!--공구 삭제되면서 장바구니도 삭제 -->
+  		<update id="deleteReserve">
+			delete from GROUPRESERVE
+			where group_id = #{group_id}
+		</update>	
+		
+		<!--공구 삭제되면서 좋아요 삭제 -->
+		<update id="deleteLike">
+			DELETE FROM likes
+			WHERE transaction = 2
+			and transaction_id= #{group_id}
+		</update>
+		
+		<!--최근 저장된 아이템 아이디 가져오기 -->
+		<select id="selectGroupId" resultType="_int">
+			select MAX(group_id)
+			from GROUPITEM
+			where seller_id = #{member_id}
+		</select>
+		
+		
+		<!-- 공구 마감 -->
+  		<update id="close" parameterType="Date">
+		    <![CDATA[
+		     UPDATE GROUPITEM SET STATUS = 'CLOSE'
+		     WHERE enddate <= #{curTime}
+		    ]]>
+		</update>
+	</mapper>

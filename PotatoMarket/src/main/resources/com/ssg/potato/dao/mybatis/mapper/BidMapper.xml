@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.ssg.potato.dao.mybatis.mapper.BidMapper">
+	
+	<!-- 입찰 쿼리문 -->
+	<insert id="insertBid">
+		INSERT INTO BID
+		(bid_id, bid_date, buyer_id, 
+		bid_price, auction_id) VALUES
+		(bid_seq.nextval, SYSDATE, #{buyer_id},
+		 #{bid_price}, #{auction_id})
+	</insert>
+	
+	<!-- 최고 입찰 금액 -->
+	<select id="selectBidHighBidPrice" resultType="_integer">
+		SELECT MAX(bid_price) AS bid_price
+		FROM BID
+		WHERE auction_id = #{auction_id}
+	</select>
+	
+	<!-- 최고 입찰 금액의 입찰자 아이디 -->
+	<select id="selectHighBidPriceBuyer" resultType="String">
+		SELECT buyer_id
+		FROM BID
+		WHERE auction_id = #{auction_id} 
+		AND bid_price = #{bid_price}
+	</select>
+	
+	<!-- 입찰 테이블 데이터 개수 확인  -->
+	<select id="dataCountBidCheck" resultType="_integer">
+		SELECT count(*)
+		FROM BID
+		WHERE auction_id = #{auction_id}
+	</select>
+	
+	<!-- 최고 입찰 금액의 입찰자 정보 -->
+	<select id="selectBid" resultType="com.ssg.potato.domain.Bid">
+		SELECT *
+		FROM BID
+		WHERE auction_id = #{auction_id}
+		AND bid_price = #{bid_price}
+	</select>
+	
+	<!-- 입찰자 리스트 조회 -->
+	<select id="selectBidList" resultType="com.ssg.potato.domain.Bid">
+		SELECT bid_id, buyer_id, auction_id, bid_price, bid_date
+		FROM BID
+		WHERE auction_id = #{auction_id}
+		ORDER BY bid_date
+	</select>
+</mapper>

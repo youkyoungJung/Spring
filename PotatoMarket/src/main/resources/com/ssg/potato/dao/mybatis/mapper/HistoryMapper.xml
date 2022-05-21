@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="com.ssg.potato.dao.mybatis.mapper.HistoryMapper">
+	
+		<resultMap type="purchasedHistory" id="purchasedHistory">
+			<result column="purchasedDate" property="purchasedDate"/>
+		</resultMap>
+		<resultMap type="Item" id="Item">
+			<result column="title" property="title"/>
+			<result column="price" property="price"/>
+			<collection property="purchasedHistory" resultMap="purchasedHistory"/>
+		</resultMap>
+	
+		<!--직접거래 구매 기록 검색 -->
+  		<select id="PurchasedItemFind" resultType="ItemThumb">
+			SELECT title, price, purchasedDate, content, filename, item_id
+            from purchaseHistory join item 
+			on transaction_id = item_id
+            where purchaseHistory.member_id = #{member_id}
+		</select>
+		
+		<!--공동구매거래 구매 기록 검색 -->
+  		<select id="PurchasedGItemFind" resultType="groupThumb">
+			select title, price, purchasedDate, content,filename, group_id
+			from purchasehistory join groupitem
+			on transaction_id = group_id
+			where purchasehistory.member_id = #{member_id}
+		</select>
+	
+		<!--경매 구매 기록 검색 -->
+  		<select id="PurchasedAItemFind" resultType="AuctionThumb">
+			select title, payment, purchasedDate, content, filename, auction_id
+			from purchasehistory  join auction 
+			on transaction_id = auction_id
+			where purchasehistory.member_id = #{member_id}
+		</select>
+	
+	</mapper>

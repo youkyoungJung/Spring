@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.ssg.potato.dao.mybatis.mapper.AuctionMapper">
+
+	<!--경매 추가 -->
+	<insert id="insert" parameterType="map">
+		insert into AUCTION values (
+		AUCTION_SEQ.nextval, #{auction.title}, #{auction.content}, #{auction.auctionPrice},
+		#{auction.price}, SYSDATE, #{member_id}, #{auction.end_date}, 0, 'OPEN',
+		#{auction.fileName})
+	</insert>
+
+	<!--경매 수정 -->
+	<update id="update" parameterType="map">
+		UPDATE AUCTION
+		SET
+		title = #{auction.title},
+		content = #{auction.content},
+		auctionPrice = #{auction.auctionPrice},
+		price = #{auction.price},
+		end_date = #{auction.end_date},
+		fileName = #{auction.fileName}
+		WHERE auction_id = #{auction.auction_id}
+	</update>
+
+	<!--경매 삭제 -->
+	<update id="delete">
+		DELETE FROM AUCTION
+		WHERE auction_id = #{auction_id}
+	</update>
+
+	<!--선택된 경매 정보 -->
+	<select id="selectAuction"
+		resultType="com.ssg.potato.domain.Auction">
+		SELECT *
+		FROM AUCTION
+		WHERE auction_id = #{auction_id}
+	</select>
+
+	<!--경매 삭제되면 좋아요 삭제 -->
+	<update id="deleteLike">
+		DELETE FROM likes
+		WHERE transaction = 3
+		and
+		transaction_id= #{auction_id}
+	</update>
+	
+	<!--최근 저장된 아이템 아이디 가져오기 -->
+	<select id="selectAuctionId" resultType="_int">
+		select MAX(auction_id)
+		from AUCTION
+		where member_id = #{member_id}
+	</select>
+
+	<!--close된 경매 아이디 가져오기 -->
+	<select id="selectCloseAuctionId"
+		resultType="com.ssg.potato.domain.Auction">
+		<![CDATA[
+		    select auction_id
+			from AUCTION
+			where STATUS = 'CLOSE'
+		]]>
+	</select>
+
+	<update id="closeAuction" parameterType="Date">
+		<![CDATA[
+			UPDATE auction SET STATUS = 'CLOSE'
+			WHERE end_date <= #{curTime}
+		]]>
+	</update>
+
+</mapper>

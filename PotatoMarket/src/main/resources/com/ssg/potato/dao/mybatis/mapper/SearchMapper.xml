@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+   <mapper namespace="com.ssg.potato.dao.mybatis.mapper.SearchMapper">
+      
+        <!--공구 전체 검색 -->
+        <select id="getGroupsList" resultType="com.ssg.potato.domain.GroupThumb">
+         select g.group_id, g.title, g.discountPrice, g.currentpeople, g.status, g.filename
+         from GROUPITEM g
+         order by  status desc, group_id desc
+      </select>   
+      
+      <!--회원간 거래 전체 검색 -->
+        <select id="getItemsList" resultType="com.ssg.potato.domain.ItemThumb">
+         select i.item_id, i.title, i.price, i.item_date, i.confirm, i.filename
+         from ITEM i 
+         order by i.confirm asc, i.item_id desc
+      </select>
+      
+      <!--경매 전체 검색 -->
+        <select id="getAuctionsList" resultType="com.ssg.potato.domain.AuctionThumb">
+         SELECT a.auction_id, a.title, a.price, a.auctionPrice, a.start_date, a.end_date, a.status, a.filename
+            from auction a 
+            order by a.status DESC, a.auction_id DESC
+      </select>
+      
+      <!--공구 등록 검색 -->
+        <select id="getGroupsAddList" resultType="com.ssg.potato.domain.GroupThumb">
+         select g.group_id, g.title, g.discountPrice, g.currentpeople, g.status, g.filename
+         from GROUPITEM g 
+         where seller_id = #{member_id}
+         order by group_id desc
+      </select>   
+      
+      <!--회원간 거래 등록 검색 -->
+        <select id="getItemsAddList" resultType="com.ssg.potato.domain.ItemThumb">
+         select i.item_id, i.title, i.price, i.item_date, i.confirm, i.filename
+         from ITEM i 
+         where member_id = #{member_id}
+         order by i.item_id desc
+      </select>
+      
+      <!--경매 등록 검색 -->
+        <select id="getAuctionsAddList" resultType="com.ssg.potato.domain.AuctionThumb">
+         SELECT a.auction_id, a.title, a.status, a.filename
+            from auction a 
+            where member_id = #{member_id}
+            order by a.auction_id DESC
+      </select>
+      
+      <select id="getMainList" resultType="com.ssg.potato.domain.Thumb">
+         select rownum, 1 as transaction, item_id as id, title, price, filename from (select * from item order by item_id desc) where rownum &lt;= 4
+         union all
+         select rownum, 2 as transaction,group_id as id, title, discountprice as price, filename from (select * from groupitem order by group_id desc) where rownum &lt;= 4
+         union all
+         select rownum,3 as transaction, auction_id as id, title, price, filename from (select * from auction order by auction_id desc) where rownum &lt;= 4
+      </select>
+      
+   </mapper>

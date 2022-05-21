@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssg.potato.dao.mybatis.mapper.ItemMapper">
+	<!--직거래 추가 -->
+	<insert id="insert" parameterType="map">
+		insert into ITEM
+		values(ITEM_SEQ.nextval, #{item.content}, #{item.price}, sysdate, 0, #{member_id}, 0
+		, '0',#{item.title}, #{item.fileName})
+	</insert>
+
+	<update id="update" parameterType="map">
+		update ITEM
+		set
+		title = #{item.title},
+		content = #{item.content},
+		price = #{item.price},
+		filename = #{item.fileName}
+		where item_id = #{item.item_id}
+	</update>
+
+	<update id="delete">
+		delete from item
+		where item_id = #{item_id}
+	</update>
+
+	<!--선택된 회원간 거래 정보 -->
+	<select id="selectItem" resultType="com.ssg.potato.domain.Item">
+		select *
+		from ITEM
+		where item_id=#{item_id}
+	</select>
+
+	<!--직거래 삭제되면서 좋아요 삭제 -->
+	<update id="deleteLike">
+		DELETE FROM likes
+		WHERE transaction = 1
+		and transaction_id= #{item_id}
+	</update>
+
+	<update id="reserve">
+		update ITEM
+		set reserve = #{member_id}
+		where item_id = #{item_id}
+	</update>
+
+	<!-- 직거래 거래 완료 -->
+	<insert id="insertItemPurchase"
+		parameterType="com.ssg.potato.domain.Item">
+		INSERT INTO purchasehistory
+		VALUES (purchase_seq.nextval,#{member_id} , 1, #{item_id}, SYSDATE,
+		#{reserve}, #{price})
+	</insert>
+
+	<update id="updateComplete">
+		update ITEM
+		set CONFIRM = 1
+		where item_id = #{item_id}
+		and member_id = #{member_id}
+	</update>
+
+	<update id="deleteReserve">
+		update ITEM
+		set reserve = '1'
+		where item_id = #{item_id}
+	</update>
+
+	<!--최근 저장된 아이템 아이디 가져오기 -->
+	<select id="selectItemId" resultType="_int">
+		select MAX(item_id)
+		from ITEM
+		where member_id = #{member_id}
+	</select>
+	
+</mapper>

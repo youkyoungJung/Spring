@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssg.potato.dao.mybatis.mapper.CartMapper">
+   <!-- item -->
+   <!--장바구니 저장된 직거래 찾기 -->
+   <select id="getItemListById"
+      resultType="com.ssg.potato.domain.ItemThumb">
+      select item_id, title, price, confirm, fileName
+      from item i 
+      where reserve=#{member_id}
+      order by confirm , item_id desc
+   </select>
+   
+   <!-- 직거래 예약 찾기 -->
+   <select id="getItemReserve"
+      resultType="com.ssg.potato.domain.Item">
+      select *
+      from item
+      where item_id=#{item_id}
+   </select>
+   
+   <!--직거래 예약 삭제 -->
+   <update id="deleteItemReserve">
+      update item
+      set reserve = '0'
+      WHERE item_id= #{item_id}
+   </update>
+   
+   <!-- group -->
+   <!--공구 예약하기 -->
+   <insert id="insertGroupReserve">
+      INSERT INTO groupReserve (reserve_id, group_id, member_id )
+      VALUES (groupreserve_seq.nextval, #{group_id}, #{member_id})
+   </insert>
+
+   <!-- 예약시, 현재 인원 추가 -->
+   <update id="updateAddCurrent">
+      update groupitem
+      set currentPeople = currentPeople + 1
+      where group_id = #{group.group_id}
+   </update>
+
+   <!--장바구니 저장된 공구 찾기 -->
+   <select id="getGroupListById"
+      resultType="com.ssg.potato.domain.GroupThumb">
+      select title, discountprice, currentpeople, status, group_id, filename
+      from groupitem g join groupreserve gr using (group_id)
+      where gr.member_id=#{member_id}
+      order by gr.reserve_id
+   </select>
+
+   <!-- 공구 예약 찾기 -->
+   <select id="getGroupReserve"
+      resultType="com.ssg.potato.domain.Group">
+      select *
+      from groupitem
+      where group_id=#{group_id}
+   </select>
+
+   <!--공동구매 예약 삭제 -->
+   <update id="deleteGroupReserve">
+      DELETE FROM groupreserve
+      WHERE group_id= #{group_id}
+      and member_id = #{member_id}
+   </update>
+
+   <!-- 장바구니에 이미 있나 없나 확인 -->
+   <select id="getCountReserve" resultType="_integer">
+      select count(group_id)
+      from groupreserve
+      where member_id = #{member_id} and group_id = #{group_id}
+   </select>
+
+   <!-- 공동 구매 결제하기 -->
+   <insert id="insertGroupPurchase">
+      INSERT INTO purchasehistory
+      VALUES (purchase_seq.nextval, #{member_id}, 2, #{group.group_id}, SYSDATE,
+      #{group.seller_id}, #{group.discountPrice} )
+   </insert>
+   
+   <!-- 공구 마감 -->
+   <update id="closeById">
+      <![CDATA[
+           UPDATE GROUPITEM SET STATUS = 'CLOSE'
+           WHERE group_id = #{group_id}
+          ]]>
+   </update>
+   
+   <!-- 공구 마감되면 장바구니에서 다 삭제 -->
+   <update id="deleteByClose">
+      DELETE FROM groupreserve
+      WHERE group_id= #{group_id}
+   </update>
+   
+</mapper>

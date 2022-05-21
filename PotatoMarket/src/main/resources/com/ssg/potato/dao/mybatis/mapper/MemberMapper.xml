@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="com.ssg.potato.dao.mybatis.mapper.MemberMapper">
+		<!--회원가입 -->
+		<insert id="memberJoin">
+  			insert into member values(#{member_id}, #{pw}, 
+  			#{name}, #{email}, #{tel})
+
+  		</insert>
+  		<!--로그인 -->
+  		<select id="readMemberWithIDPW" resultType="com.ssg.potato.domain.Member">
+			select *
+			from member
+			where member_id=#{member_id} and member_pw=#{pw}
+		</select>	
+		
+		<!--회원정보 찾기 -->
+  		<select id="memberFind" resultType="com.ssg.potato.domain.Member">
+			select *
+			from member
+			where member_id=#{member_id}
+		</select>
+
+
+		<!--회원정보 수정 -->
+  		<update id="memberUpdate">
+			update member
+			set
+			member_pw = #{pw},
+			name = #{name},
+			email = #{email},
+			tel = #{tel}
+			where member_id = #{member_id}
+		</update>	
+		
+		<!--회원정보 삭제 -->
+  		<update id="memberDelete">
+			delete from member
+			where member_id = #{member_id}
+		</update>	
+		
+	</mapper>

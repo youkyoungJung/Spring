@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssg.potato.dao.mybatis.mapper.LikeMapper">
+
+	<!--관심 종목 추가-->
+	<insert id="insertItemLike">
+		INSERT INTO likes 
+		VALUES (like_seq.nextval, 1, #{item_id}, #{member_id})
+	</insert>
+	
+	<insert id="insertGroupLike">
+		INSERT INTO likes 
+		VALUES (like_seq.nextval, 2, #{group_id}, #{member_id})
+	</insert>
+	
+	<insert id="insertAuctionLike">
+		INSERT INTO likes 
+		VALUES (like_seq.nextval, 3, #{auction_id}, #{member_id})
+	</insert>
+	
+	<!--공동구매 예약 삭제 -->
+	<update id="deleteLike">
+		DELETE FROM likes
+		WHERE transaction_id= #{transaction_id}
+		and member_id = #{member_id}
+	</update>
+	
+	<!-- 장바구니에 이미 있나 없나 확인 -->
+	<select id="getCountLike" resultType="_integer">
+		select count(*)
+		from likes
+		where member_id = #{member_id} 
+		and transaction_id = #{transaction_id}
+	</select>
+
+	<update id="upItemLike">
+		update item
+		set likes = likes + 1
+		where item_id = #{item_id}
+	</update>
+	
+	<update id="downItemLike">
+		update item
+		set likes = likes - 1
+		where item_id = #{item_id}
+	</update>
+	
+	<update id="upGroupLike">
+		update groupitem
+		set likes = likes + 1
+		where group_id = #{group_id}
+	</update>
+	
+	<update id="downGroupLike">
+		update groupitem
+		set likes = likes - 1
+		where group_id = #{group_id}
+	</update>
+	
+	<update id="upAuctionLike">
+		update auction
+		set likes = likes + 1
+		where auction_id = #{auction_id}
+	</update>
+	
+	<update id="downAuctionLike">
+		update auction
+		set likes = likes - 1
+		where auction_id = #{auction_id}
+	</update>
+	
+		<!-- 리스트반환 -->
+	<!--직접거래 좋아요 기록 검색 -->
+	<select id="LikesItemFind" resultType="ItemThumb">
+		select title, price, content, likes, item_date, confirm, reserve, filename, item_id
+		from likes join item
+		on transaction_id = item_id
+		where likes.member_id = #{member_id}
+	</select>
+	
+	<!--공동구매거래 좋아요 기록 검색 -->
+			<select id="LikesGItemFind" resultType="groupThumb">
+		select title, price, content, startDate, endDate, likes, maxPeople, currentPeople, discountPrice, status, filename, group_id 
+		from likes join groupItem
+		on transaction_id = group_id
+		where likes.member_id = #{member_id}
+	</select>
+	
+	<!--경매 좋아요 기록 검색 -->
+			<select id="LikesAItemFind" resultType="AuctionThumb">
+		select title, price, content, auctionPrice, start_date, end_date, likes, filename, auction_id
+		from likes join auction
+		on transaction_id = auction_id
+		where likes.member_id = #{member_id}
+	</select>
+	
+</mapper>
